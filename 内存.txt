@@ -1,0 +1,3 @@
+jmap -dump:live,format=b,file=heap.bin pid£¨½ø³ÌºÅ£©
+
+jhat -J-mx800m heap.bin
