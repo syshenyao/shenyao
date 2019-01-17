@@ -92,6 +92,47 @@ flashback table 表名 to scn 1499220;  --　　3、恢复删除且已提交的数据
 
 ---优化
 
+--查看SQL执行计划
+--方法一：利用autotrace查看执行计划
+		--注意：autotrace所查询的执行计划并不是真实的执行计划（这个计划是从PLAN_TABLE中来的），是CBO预估的
+
+--方法二：注意：EXPLAIN PLAN FOR ......所查询的执行计划并不是真实的执行计划，是CBO预估的。（PLSQL F5调用的就是它）
+
+
+
+--方法三:真正的SQL执行计划
+ALTER SESSION SET STATISTICS_LEVEL=ALL; ---再运行SQL
+
+--执行SQL
+
+SELECT * FROM TABLE(DBMS_XPLAN.DISPLAY_CURSOR(NULL,NULL,'ALLSTATS LAST'));
+
+
+
+--方法四:
+--查看v$sql_plan表
+--通过SQL语句的SQL_ID和子游标号，可以在V$SQL_PLAN表中查看到该SQL语句的执行计划。
+
+SQL> select sql_id,sql_text from v$sqlarea where sql_text like '%from t1%';
+SQL_ID         SQL_TEXT
+------------- ----------------------------------------------------------------------------------------------------
+27uhu2q2xuu7r select * from t1
+
+SQL> select sql_id,child_number,sql_text from v$sql where sql_id='27uhu2q2xuu7r';
+SQL_ID CHILD_NUMBER SQL_TEXT
+------------- ------------ ----------------------------------------------------------------------------------------------------
+27uhu2q2xuu7r 0 select * from t1
+--通过以上两条查询语句，查得目标SQL语句的SQL_ID为 “27uhu2q2xuu7r”， ?子游标号为“0”.
+SQL> select timestamp,operation,options,object_name,cost,id,parent_id from v$sql_plan where sql_id='27uhu2q2xuu7r' and child_number=0;
+
+
+
+--方法五:
+
+select * from  table(dbms_xplan.display_awr('bjqjt2dfvya84'));
+
+
+
 --查询SGA各个区域大小的SQL
 
 select pool,sum(bytes)/1024/1024||'MB' from v$sgastat where pool is not null group by pool;
