@@ -1,4 +1,13 @@
 --常规
+select value as processes_max from v$parameter where name ='processes';  --数据库允许的最大连接数  结果4000
+
+select count(*) as process_now from v$process; --当前进程连接数
+
+select value as session_max from v$parameter where name ='sessions'; --数据库最大session数
+
+select count(*) as session_now from v$session;  --当前的session连接数
+ 
+select count(*) as active_now from v$session where status='ACTIVE';　--并发连接数
 
 --查询死锁的语句
 select sess.sid,sess.serial#,lo.oracle_username,lo.os_user_name,ao.object_name,lo.locked_mode  from v$locked_object lo,dba_objects ao,v$session sess where ao.object_id = lo.object_id and lo.session_id = sess.sid;
@@ -21,6 +30,48 @@ GROUP BY tablespace_name) a,
 FROM dba_data_files 
 GROUP BY tablespace_name) b 
 WHERE a.tablespace_name = b.tablespace_name;
+
+
+--查看临时表空间使用情况
+SELECT TU.TABLESPACE_NAME AS "TABLESPACE_NAME",
+TT.TOTAL - TU.USED AS "FREE(G)",
+TT.TOTAL AS "TOTAL(G)",
+ROUND(NVL(TU.USED, 0) / TT.TOTAL * 100, 3) AS "USED(%)",
+ROUND(NVL(TT.TOTAL - TU.USED, 0) * 100 / TT.TOTAL, 3) AS "FREE(%)"
+FROM (SELECT TABLESPACE_NAME,
+SUM(BYTES_USED) / 1024 / 1024 / 1024 USED
+FROM V$TEMP_SPACE_HEADER
+GROUP BY TABLESPACE_NAME) TU ,
+(SELECT TABLESPACE_NAME,
+SUM(BYTES) / 1024 / 1024 / 1024 AS TOTAL
+FROM DBA_TEMP_FILES where tablespace_name = 'TEMP'
+GROUP BY TABLESPACE_NAME) TT
+WHERE TU.TABLESPACE_NAME = TT.TABLESPACE_NAME;
+
+--查看临时表空间占用过高的SQL
+
+select sql_id,operation_type as op, operation_id as id,
+  round(estimated_optimal_size/1024/1024,2) as e_opt,  
+  round(estimated_onepass_size/1024/1024,2) as e_one,
+  round(last_memory_used/1024/1024,2) as l_mem,
+  Last_execution as last,
+  total_executions as tot, optimal_executions as opt,
+  onepass_executions as one, 
+  multipasses_executions as mult,
+  round(active_time/1000000,2) as sec,   
+  round(max_tempseg_size/1024/1024,2) as tmp_m, 
+  round(last_tempseg_size/1024/1024,2) as tmp_L
+from v$sql_workarea 
+where 
+  max_tempseg_size is not null 
+order by max_tempseg_size desc;
+
+
+--增加临时表空间
+ALTER TABLESPACE TEMP ADD TEMPFILE 'D:\MYORACLE\ORACLE\ORADATA\ORCL\TEMP03.DBF' SIZE 31G;
+
+alter database tempfile 'D:\MYORACLE\ORACLE\ORADATA\ORCL\TEMP02.DBF' RESIZE 31G
+
 
 --导库的SQL
 impdp BBZX130_CS/1@orcl directory=DUMP_DIR dumpfile=BBZX130.DMP REMAP_SCHEMA=BBZX130:BBZX130_CS  transform=oid:n logfile=impdp201703281140.log  remap_tablespace=YSSUCO130:YSSUCO;
