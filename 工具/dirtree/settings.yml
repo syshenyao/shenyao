@@ -1,0 +1,38 @@
+settings:
+    extansions: [cs, xls, xlsx, java, csv, doc, docx, pdf, yml, py, ppt, pptx, php]
+    handler:
+        backup: false
+        
+data: {}
+
+mappings:
+    extansions:
+        yml: notepad++.exe
+        php: notepad++.exe
+        py: notepad++.exe
+        csv: notepad++.exe
+        bat: notepad++.exe
+        cs: notepad++.exe
+        cpp: notepad++.exe
+        c: notepad++.exe
+        java: notepad++.exe
+        doc: wps.exe
+        docx: wps.exe
+        pdf: wps.exe
+        xls: et.exe
+        xlsx: et.exe
+        ppt: wpp.exe
+        pptx: wpp.exe
+verification:
+    notepad++.exe:
+        check_process: false
+        certificate: false
+    wps.exe:
+        check_process: false
+        certificate: true
+    wpp.exe:
+        check_process: false
+        certificate: true
+    et.exe:
+        check_process: false
+        certificate: true
