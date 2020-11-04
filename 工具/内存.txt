@@ -1,3 +1,5 @@
 jmap -dump:live,format=b,file=heap.bin pid（进程号）
 
 jhat -J-mx800m heap.bin
+
+mat:income 查看被谁引用 outcome查看引用的对象
