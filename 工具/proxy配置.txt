@@ -1,0 +1,37 @@
+场景一:
+前端请求:demo11/selectAll
+
+{
+  "/de": {
+      "target": "http://localhost:9998/ams-demo"
+
+    
+ }
+}
+
+
+转发之后:
+ams-demo/demo11/selectAll
+
+
+
+
+
+场景二:
+
+前端请求:demo11/selectAll
+
+
+{
+  "/demo11": {
+      "target": "http://localhost:9998/ams-demo",
+      "pathRewrite": {
+        "^/demo11": "demo12"
+    }
+
+    
+ }
+}
+
+转发之后:
+ams-demo/demo12/selectAll
